@@ -2,6 +2,29 @@
 
 A comprehensive Streamlit-based dashboard for Program Increment (PI) Planning that integrates with JIRA and uses AI agents for intelligent automation. This tool streamlines the entire PI planning process from goal validation to dependency analysis.
 
+## ⚡ Quick Setup (3 Commands)
+
+```bash
+# 1. Setup Python environment
+git clone <repository-url> && cd pi_planning_dashboard
+python -m venv venv && source venv/bin/activate && pip install -r requirements.txt
+
+# 2. Start MCP JIRA Server (replace with your credentials)
+docker pull ghcr.io/sooperset/mcp-atlassian:latest
+docker run --rm -p 3000:3000 \
+  -e JIRA_URL=https://yourcompany.atlassian.net \
+  -e JIRA_USERNAME=your-email@company.com \
+  -e JIRA_API_TOKEN=your-jira-api-token \
+  ghcr.io/sooperset/mcp-atlassian:latest \
+  --transport streamable-http --port 3000
+
+# 3. Run the dashboard
+cp .env.example .env  # Edit with your config
+streamlit run app/main.py
+```
+
+**🎯 Result**: Dashboard running at `http://localhost:8501` with real JIRA integration!
+
 ## 🌟 Features
 
 ### 📋 Core Functionality
@@ -125,6 +148,152 @@ OPENAI_MODEL=gpt-4
 ANTHROPIC_API_KEY=your-anthropic-api-key
 DEFAULT_AI_PROVIDER=openai
 ```
+
+#### JIRA MCP Server Integration (Required for Real JIRA Operations)
+
+This project integrates with the **MCP Atlassian Docker Server** for real JIRA operations. The MCP server acts as a bridge between the dashboard and your JIRA instance.
+
+**🐳 Docker MCP Server Setup (Recommended)**
+
+1. **Prerequisites**
+   ```bash
+   # Ensure Docker is installed and running
+   docker --version
+   ```
+
+2. **Pull the MCP Atlassian Docker Image**
+   ```bash
+   # This is the official MCP Atlassian server image
+   docker pull ghcr.io/sooperset/mcp-atlassian:latest
+   ```
+
+3. **Get Your JIRA Credentials**
+   - **JIRA URL**: Your Atlassian instance (e.g., `https://yourcompany.atlassian.net`)
+   - **Username**: Your JIRA email address
+   - **API Token**: Generate from [Atlassian Account Settings](https://id.atlassian.com/manage-profile/security/api-tokens)
+
+4. **Start the MCP Atlassian Server**
+   ```bash
+   # Replace with your actual JIRA credentials
+   docker run --rm -p 3000:3000 \
+     -e JIRA_URL=https://yourcompany.atlassian.net \
+     -e JIRA_USERNAME=your-email@company.com \
+     -e JIRA_API_TOKEN=your-jira-api-token \
+     ghcr.io/sooperset/mcp-atlassian:latest \
+     --transport streamable-http --port 3000
+   ```
+
+4. **Verify MCP Server is Running**
+   ```bash
+   # Test the connection
+   curl http://localhost:3000/mcp/
+   
+   # You should see MCP server information
+   ```
+
+5. **Configure Dashboard Environment**
+   ```env
+   # Add to your .env file
+   MCP_SERVER_URL=http://localhost:3000/mcp/
+   JIRA_PROJECT_KEY=YOUR_PROJECT_KEY
+   ```
+
+**🔧 Alternative: Manual MCP Server Setup**
+
+If you prefer to run the MCP server manually:
+
+1. **Clone the MCP Atlassian Repository**
+   ```bash
+   git clone https://github.com/sooperset/mcp-atlassian.git
+   cd mcp-atlassian
+   ```
+
+2. **Install Dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Configure Environment**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your JIRA credentials
+   ```
+
+4. **Start the Server**
+   ```bash
+   npm start -- --transport streamable-http --port 3000
+   ```
+
+**🛠️ Available MCP Tools**
+
+The MCP server provides 31+ JIRA tools including:
+- `jira_create_issue`: Creates Epics, Stories, Tasks, and Bugs
+- `jira_search`: Search issues using JQL
+- `jira_get_project_issues`: Get all issues for a project
+- `jira_get_issue`: Get detailed issue information
+- `jira_get_transitions`: Get available status transitions
+- `jira_get_agile_boards`: Get Agile/Scrum boards
+- `jira_get_user_profile`: Get user information
+- And many more...
+
+**✅ Testing Your MCP Setup**
+
+1. **Test MCP Connection**
+   ```bash
+   # From the dashboard directory
+   python3 test_new_mcp_client.py
+   ```
+
+2. **Expected Output**
+   ```
+   🚀 Testing New MCP Client Implementation
+   ✅ Successfully connected to MCP server!
+   🔗 Server URL: http://localhost:3000/mcp/
+   🛠️  Available tools: 31
+   ✅ Successfully created JIRA issue!
+   ```
+
+**🚨 Troubleshooting MCP Setup**
+
+**Connection Refused**
+```bash
+# Check if Docker container is running
+docker ps
+
+# Check if port 3000 is available
+lsof -i :3000
+
+# Restart the MCP server
+docker stop <container-id>
+# Then run the docker command again
+```
+
+**Authentication Errors**
+```bash
+# Verify your JIRA credentials
+curl -u "your-email@company.com:your-api-token" \
+  "https://yourcompany.atlassian.net/rest/api/2/myself"
+```
+
+**MCP Server Not Responding**
+```bash
+# Check Docker logs
+docker logs <container-id>
+
+# Try different port
+docker run --rm -p 3001:3000 \
+  -e JIRA_URL=... \
+  ghcr.io/sooperset/mcp-atlassian:latest \
+  --transport streamable-http --port 3000
+```
+
+**🎯 Benefits of MCP Integration**
+- ✅ **Real-time JIRA Operations**: Create, update, and search JIRA issues instantly
+- ✅ **Automatic Authentication**: Secure credential handling through Docker environment
+- ✅ **Consistent API Responses**: Standardized MCP protocol for reliable integration
+- ✅ **Error Handling**: Built-in retry logic and comprehensive error reporting
+- ✅ **31+ JIRA Tools**: Complete JIRA API coverage through MCP tools
+- ✅ **Session Management**: Persistent connections for better performance
 
 ### JIRA API Token Setup
 
