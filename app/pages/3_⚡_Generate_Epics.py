@@ -114,7 +114,7 @@ def main():
         next_disabled = not bool(generated_epics)
         if st.button("Continue to Review & Push →", use_container_width=True, disabled=next_disabled):
             if not next_disabled:
-                st.info("Next step: Review & Push to JIRA (Coming Soon)")
+                st.switch_page("pages/4_📤_Review_Push.py")
 
 def generate_epics_and_features(goals: List[Dict[str, Any]]):
     """Generate Epics and Features using AI agent"""
